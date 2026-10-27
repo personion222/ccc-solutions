@@ -1,27 +1,36 @@
-t = int(input())
-out = []
-for i in range(t):
-    n = int(input())
-    cars = []
-    for j in range(n):
-        cars.append(int(input()))
-    cars = cars[::-1]
+from copy import deepcopy
 
-    declast = n + 1
-    inclast = 0
-    exiting = False
-    for car in cars:
-        if declast - car != 1:
-            if car - inclast != 1:
-                exiting = True
-                break
-            else:
-                inclast = car
+t = int(input())
+
+tests = []
+
+for _ in range(t):
+    n = int(input())
+    tests.append([int(input()) for __ in range(n)])
+
+out = []
+
+for test in tests:
+    highest = len(test)
+    lowest = 1
+    branch = []
+    lake = []
+    test_cars = deepcopy(test)
+    result = 'Y'
+    while test_cars:
+        if test_cars[-1] == lowest:
+            lowest += 1
+            lake.append(test_cars.pop())
+        elif branch:
+            if test_cars[-1] < branch[-1]:
+                branch.append(test_cars.pop())
         else:
-            declast = car
-    if exiting:
-        out.append('N')
-        continue
-    out.append('Y')
+            result = 'N'
+            break
+    if result == 'Y':
+        if not all([lake[i] < lake[i + 1] for i in range(len(lake) - 1)]):
+            result = 'N'
+
+    out.append(result)
 
 print('\n'.join(out))

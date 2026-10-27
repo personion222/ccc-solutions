@@ -1,21 +1,25 @@
-paths = {}
+roads = {}
+road_names = set()
 
 while 1:
     src, dst = input()
     if src == '*': break
-    if src in paths:
-        paths[src].append(dst)
+
+    road_names.add(src + dst)
+
+    if src in roads:
+        roads[src].append(dst)
     else:
-        paths[src] = [dst]
-    if dst in paths:
-        paths[dst].append(src)
+        roads[src] = [dst]
+    if dst in roads:
+        roads[dst].append(src)
     else:
-        paths[dst] = [src]
+        roads[dst] = [src]
 
 
 def bfs(src, dst, no_visit=None, path=[]):
     if src == dst:
-        return [path + [src]]
+        return [join_paths(path + [src])]
 
     if src == no_visit:
         return []
@@ -23,14 +27,38 @@ def bfs(src, dst, no_visit=None, path=[]):
     if src in path:
         return []
 
-    connection_paths = []
+    connection_roads = []
 
-    for connection in paths[src]:
+    for connection in roads[src]:
         connection_path = bfs(connection, dst, no_visit, path + [src])
 
         if connection_path:
-            connection_paths += connection_path
+            connection_roads += connection_path
 
-    return connection_paths
+    return connection_roads
 
-print(bfs('A', 'B'))
+def join_paths(points):
+    joined_path = []
+    for idx, point in enumerate(points[:-1]):
+        order_1 = point + points[idx + 1]
+        order_2 = points[idx + 1] + point
+        if order_1 in road_names:
+            joined_path.append(order_1)
+        else:
+            joined_path.append(order_2)
+
+    return joined_path
+
+
+paths = bfs('A', 'B')
+disconnecting_candidates = set(paths[0])
+disconnecting = set(paths[0])
+
+for path in paths[1:]:
+    for road in disconnecting_candidates:
+        if road not in path and road in disconnecting:
+            disconnecting.remove(road)
+
+for disconnecting_road in disconnecting:
+    print(disconnecting_road)
+print(f"There are {len(disconnecting)} disconnecting roads.")
